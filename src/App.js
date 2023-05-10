@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { View, Image, StyleSheet, SafeAreaView, Text } from 'react-native';
 import WebviewComponent from './components/WebviewComponent';
+import SplashScreen from 'react-native-splash-screen';
 
 const App = () => {
   const [visible, setVisible] = useState(true);
   useEffect(()=>{
     if(!visible){
-     // SplashScreen.hide();
+     SplashScreen.hide();
     }
   },[visible])
   return (

@@ -10,7 +10,6 @@
     "test": "jest"
   },
   "dependencies": {
-    "@actbase/react-kakaosdk": "^0.9.26",
     "@react-native-async-storage/async-storage": "^1.18.1",
     "@react-native-community/push-notification-ios": "^1.11.0",
     "@react-native-firebase/analytics": "^17.4.3",

@@ -8,3 +8,5 @@ include ':app', ':kakao-sdk-common'
 project(':kakao-sdk-common').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-seoul/kakao-sdk/android')
 include ':react-native-shared-preferences', ':app'
 project(':react-native-shared-preferences').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-shared-preferences/android')
+include ':react-native-splash-screen'   
+project(':react-native-splash-screen').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-splash-screen/android')

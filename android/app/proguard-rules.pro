@@ -8,3 +8,12 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Add any project specific keep options here:
+# For Kakao Login
+-keepattributes *Annotation*
+-keepattributes Signature
+-keep class com.kakao.auth.**{*;}
+-keep class com.kakao.util.helper.**{*;}
+-keep class com.kakao.network.**{*;}
+-keep class com.kakao.usermgmt.**{*;}
+-keep class com.kakao.sdk.**{*;}
+-dontwarn com.kakao.sdk.**

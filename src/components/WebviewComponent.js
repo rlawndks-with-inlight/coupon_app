@@ -58,9 +58,9 @@ const WebviewComponent = (props) => {
             if (webViewRef.current) {
                 try {
                     const token = await login();
-
+                    console.log(token)
                     const profile = await getKakaoProfile();
-
+                    console.log(profile)
                     let kakao_data = await getSharedPreference(SHARED_PREFERENCE.KAKAO_DATA);
                     
                     if(typeof kakao_data == 'string'){
