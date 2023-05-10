@@ -1,0 +1,40 @@
+
+{
+  "project_info": {
+    "project_number": "849509678131",
+    "project_id": "comagain-af622",
+    "storage_bucket": "comagain-af622.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:849509678131:android:0fb7b4ab8e393d367f3746",
+        "android_client_info": {
+          "package_name": "com.comagain.comagain"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "849509678131-9m2rq9pp9c8amjbtmns0n3fehalc0i7v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIsU16zgJ2UujeD68MFv_SXL_IUlm8d8s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "849509678131-9m2rq9pp9c8amjbtmns0n3fehalc0i7v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
