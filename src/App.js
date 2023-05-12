@@ -5,25 +5,18 @@ import SplashScreen from 'react-native-splash-screen';
 
 const App = () => {
   const [visible, setVisible] = useState(true);
-  useEffect(()=>{
-    if(!visible){
-     SplashScreen.hide();
+  useEffect(() => {
+    if (!visible) {
+      SplashScreen.hide();
     }
-  },[visible])
+  }, [visible])
   return (
     <View style={styles.container}>
-        {visible ?
-          <View style={styles.splash}>
-            <Image source={require('../assets/images/splash.png')} />
-          </View>
-          :
-          <>
-          </>}
-        <WebviewComponent
-          func={{
-            setVisible
-          }}
-        />
+      <WebviewComponent
+        func={{
+          setVisible
+        }}
+      />
     </View>
   );
 };
