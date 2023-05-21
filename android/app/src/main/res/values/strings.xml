@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">컴어게인</string>
     <string name="kakao_app_key">aea9d29acd26cfaac1a122a7dad00639</string>
+    <!-- REACT_NATIVE_KAKAO_APP_KEY -->
 </resources>

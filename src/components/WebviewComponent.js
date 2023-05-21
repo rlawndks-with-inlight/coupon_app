@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { WebView } from 'react-native-webview';
-import { BackHandler } from 'react-native';
+import { BackHandler, Platform } from 'react-native';
 import { login, logout, getProfile as getKakaoProfile, unlink } from '@react-native-seoul/kakao-login';
 import { SHARED_PREFERENCE, deleteSharedPreference, getSharedPreference, setSharedPreference } from '../shared-preference';
 
@@ -17,7 +17,8 @@ const WebviewComponent = (props) => {
             setVisible
         }
     } = props;
-
+    useEffect(() => {
+    }, [])
     const webViewRef = useRef(null);
 
     const [webViewUrl, setWebViewUrl] = useState(WEBVIEW_URL);
@@ -54,7 +55,6 @@ const WebviewComponent = (props) => {
         let method = event?.method;
         let data = {};
         if (event?.method == 'kakao_login') {//
-
             if (webViewRef.current) {
                 try {
                     const token = await login();
@@ -62,12 +62,11 @@ const WebviewComponent = (props) => {
                     const profile = await getKakaoProfile();
                     console.log(profile)
                     let kakao_data = await getSharedPreference(SHARED_PREFERENCE.KAKAO_DATA);
-                    
-                    if(typeof kakao_data == 'string'){
+
+                    if (typeof kakao_data == 'string') {
                         kakao_data = JSON.parse(kakao_data);
                     }
-                    if(kakao_data?.id != profile?.id){
-                        console.log(1)
+                    if (kakao_data?.id != profile?.id) {
                         let result = await deleteSharedPreference(SHARED_PREFERENCE.PHONE);
                         let result2 = await setSharedPreference(SHARED_PREFERENCE.KAKAO_DATA, JSON.stringify(profile));
                     }
@@ -83,13 +82,37 @@ const WebviewComponent = (props) => {
                 }
 
             }
+        } else if (event?.method == 'apple_login') {
+
         } else if (event?.method == 'phone_save') {//
-            let phone = await getSharedPreference(SHARED_PREFERENCE.PHONE);
-            
-            if(phone != event.data?.phone && phone){ // 새로운 폰번호가 들어왔을때
-                let result = await deleteSharedPreference(SHARED_PREFERENCE.KAKAO_DATA);
+            try {
+                let phone = await getSharedPreference(SHARED_PREFERENCE.PHONE);
+
+                if (phone != event.data?.phone && phone) { // 새로운 폰번호가 들어왔을때
+                    let result = await deleteSharedPreference(SHARED_PREFERENCE.KAKAO_DATA);
+                }
+                console.log(event.data)
+
+                setSharedPreference(SHARED_PREFERENCE.PHONE, event.data?.phone ?? "")
+                setSharedPreference(SHARED_PREFERENCE.TOKEN, event.data?.token ?? "")
+                setSharedPreference(SHARED_PREFERENCE.LOGIN_TYPE, event.data?.login_type ?? "0")
+                return;
+            } catch (err) {
+                console.log(err);
             }
-            setSharedPreference(SHARED_PREFERENCE.PHONE, event.data?.phone ?? "")
+
+        } else if (event?.method == 'logined') {
+            let phone = await getSharedPreference(SHARED_PREFERENCE.PHONE);
+            let token = await getSharedPreference(SHARED_PREFERENCE.TOKEN);
+            let login_type = await getSharedPreference(SHARED_PREFERENCE.LOGIN_TYPE);
+            let os = Platform.OS;
+            webViewRef.current.postMessage(
+                JSON.stringify({ method: event?.method, data: { phone: phone, token: token, login_type: login_type, os: os.toString() } }),
+                '*'
+            )
+        } else if (event?.method == 'logout') {
+            let result2 = await deleteSharedPreference(SHARED_PREFERENCE.TOKEN);
+            let result3 = await deleteSharedPreference(SHARED_PREFERENCE.LOGIN_TYPE);
         }
     }
     const handleWebViewNavigationStateChange = (navState) => {
@@ -103,7 +126,7 @@ const WebviewComponent = (props) => {
         <WebView
             ref={webViewRef}
             source={{ uri: `${WEBVIEW_URL}/app/login/` }}
-            style={{ flex: 1 }}
+            style={{ flex: 1, marginTop: (Platform.OS == 'ios' ? 20 : 0) }}
             javaScriptEnabled={true}
             onMessage={onMessage}
             onNavigationStateChange={handleWebViewNavigationStateChange}

@@ -32,6 +32,7 @@ package="com.comagain.comagain"
       	<!-- kakao라는 텍스트는 지우지 않는다!!!!! -->
           <data android:host="oauth"
             android:scheme="kakaoaea9d29acd26cfaac1a122a7dad00639" />
+            <!-- REACT_NATIVE_KAKAO_APP_KEY -->
         </intent-filter>
       </activity>
     <service
