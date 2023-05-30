@@ -3,6 +3,12 @@ import { WebView } from 'react-native-webview';
 import { BackHandler, Platform } from 'react-native';
 import { login, logout, getProfile as getKakaoProfile, unlink } from '@react-native-seoul/kakao-login';
 import { SHARED_PREFERENCE, deleteSharedPreference, getSharedPreference, setSharedPreference } from '../shared-preference';
+import appleAuth, {
+    AppleButton,
+    AppleAuthRequestOperation,
+    AppleAuthRequestScope,
+    AppleAuthCredentialState,
+} from '@invertase/react-native-apple-authentication';
 
 const WEBVIEW_URL = `https://team.comagain.kr`;
 const ON_END_URL_LIST = [
@@ -10,6 +16,21 @@ const ON_END_URL_LIST = [
     `${WEBVIEW_URL}/app/login/`,
     `${WEBVIEW_URL}/app/home/`,
 ]
+async function onAppleButtonPress() {
+    // performs login request
+    const appleAuthRequestResponse = await appleAuth.performRequest({
+        requestedOperation: AppleAuthRequestOperation.LOGIN,
+        requestedScopes: [AppleAuthRequestScope.EMAIL, AppleAuthRequestScope.FULL_NAME],
+    });
+
+    // get current authentication state for user
+    const credentialState = await appleAuth.getCredentialStateForUser(appleAuthRequestResponse.user);
+
+    // use credentialState response to ensure the user is authenticated
+    if (credentialState === AppleAuthCredentialState.AUTHORIZED) {
+        // user is authenticated
+    }
+}
 const WebviewComponent = (props) => {
 
     const {
@@ -83,7 +104,7 @@ const WebviewComponent = (props) => {
 
             }
         } else if (event?.method == 'apple_login') {
-
+            onAppleButtonPress();
         } else if (event?.method == 'phone_save') {//
             try {
                 let phone = await getSharedPreference(SHARED_PREFERENCE.PHONE);
@@ -126,7 +147,7 @@ const WebviewComponent = (props) => {
         <WebView
             ref={webViewRef}
             source={{ uri: `${WEBVIEW_URL}/app/login/` }}
-            style={{ flex: 1, marginTop: (Platform.OS == 'ios' ? 20 : 0) }}
+            style={{ flex: 1 }}
             javaScriptEnabled={true}
             onMessage={onMessage}
             onNavigationStateChange={handleWebViewNavigationStateChange}

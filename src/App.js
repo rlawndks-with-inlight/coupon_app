@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { View, Image, StyleSheet, SafeAreaView, Text } from 'react-native';
 import WebviewComponent from './components/WebviewComponent';
 import SplashScreen from 'react-native-splash-screen';
+import { BackHandler, Platform } from 'react-native';
 
 const App = () => {
   const [visible, setVisible] = useState(true);
@@ -11,7 +12,7 @@ const App = () => {
     }
   }, [visible])
   return (
-    <View style={styles.container}>
+    <View style={{ ...styles.container, paddingTop: (Platform.OS == 'ios' ? 30 : 0) }}>
       <WebviewComponent
         func={{
           setVisible

@@ -1,22 +1,9 @@
 #import "AppDelegate.h"
 
+#import "RNKakaoLogins.h"
 #import <React/RCTBundleURLProvider.h>
-#import <RNKakaoLogins.h>
-#import "RNSplashScreen.h"
 
 @implementation AppDelegate
-
-- (BOOL)application:(UIApplication *)app
-     openURL:(NSURL *)url
-     options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {
- if([RNKakaoLogins isKakaoTalkLoginUrl:url]) {
-    return [RNKakaoLogins handleOpenUrl: url];
- }
- return NO;
-    [RNSplashScreen show];
-    return YES;  
-    
-}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -36,6 +23,15 @@
   return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
 }
+
+- (BOOL)application:(UIApplication *)app
+   openURL:(NSURL *)url
+   options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {
+   if ([RNKakaoLogins isKakaoTalkLoginUrl:url]) {
+      return [RNKakaoLogins handleOpenUrl: url];
+   }
+   return NO;
+  }
 
 /// This method controls whether the `concurrentRoot`feature of React18 is turned on or off.
 ///
