@@ -1,0 +1,13 @@
+## 안드로이드
+
+# 카카오 디버그키 발급
+- 루트경로에서
+- keytool -exportcert -alias androiddebugkey -keystore ./android/app/debug.keystore -storepass android -keypass android | openssl sha1 -binary | openssl base64
+# 카카오 릴리즈키 발급
+- 루트경로에서
+- keytool -exportcert -alias my-key-alias -keystore ./android/app/my-release-key.keystore | openssl sha1 -binary | openssl base64
+# 플레이스토어 릴리즈키 발급
+- 루트경로에서
+- echo <구글플레이 SHA-1 인증서지문 입력> | xxd -r -p | openssl base64
+
+## ios

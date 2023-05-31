@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { WebView } from 'react-native-webview';
-import { BackHandler, Platform } from 'react-native';
+//import { WebView } from 'react-native-webview';
+import { BackHandler, Platform, ToastAndroid } from 'react-native';
 import { login, logout, getProfile as getKakaoProfile, unlink } from '@react-native-seoul/kakao-login';
 import { SHARED_PREFERENCE, deleteSharedPreference, getSharedPreference, setSharedPreference } from '../shared-preference';
-import appleAuth, {
-    AppleButton,
-    AppleAuthRequestOperation,
-    AppleAuthRequestScope,
-    AppleAuthCredentialState,
-} from '@invertase/react-native-apple-authentication';
+import { WebView } from 'react-native-webview';
+import { appleAuth, AppleButton } from '@invertase/react-native-apple-authentication';
+// import SmsRetriever from 'react-native-sms-retriever';
+
 
 const WEBVIEW_URL = `https://team.comagain.kr`;
 const ON_END_URL_LIST = [
@@ -17,103 +15,121 @@ const ON_END_URL_LIST = [
     `${WEBVIEW_URL}/app/home/`,
 ]
 async function onAppleButtonPress() {
-    // performs login request
-    const appleAuthRequestResponse = await appleAuth.performRequest({
-        requestedOperation: AppleAuthRequestOperation.LOGIN,
-        requestedScopes: [AppleAuthRequestScope.EMAIL, AppleAuthRequestScope.FULL_NAME],
-    });
-
-    // get current authentication state for user
-    const credentialState = await appleAuth.getCredentialStateForUser(appleAuthRequestResponse.user);
-
-    // use credentialState response to ensure the user is authenticated
-    if (credentialState === AppleAuthCredentialState.AUTHORIZED) {
-        // user is authenticated
+    // start a login request
+    try {
+        const appleAuthRequestResponse = await appleAuth.performRequest({
+            requestedOperation: appleAuth.Operation.LOGIN,
+            requestedScopes: [appleAuth.Scope.FULL_NAME],
+        });
+        return appleAuthRequestResponse
+    } catch (error) {
+        return {};
     }
 }
 const WebviewComponent = (props) => {
-
     const {
         func: {
-            setVisible
+            setVisible,
+            setBackgroundColor
         }
     } = props;
-    useEffect(() => {
-    }, [])
+
+
+    // SMS 수신 이벤트 등록
     const webViewRef = useRef(null);
 
-    const [webViewUrl, setWebViewUrl] = useState(WEBVIEW_URL);
+    const [canGoBack, setCanGoBack] = useState(false);
     const [backButtonCount, setBackButtonCount] = useState(0);
+    const [currentURL, setCurrentURL] = useState('');
+    const [timeLeft, setTimeLeft] = useState(0);
+
+    // useEffect(() => {
+    //     // SMS 수신 이벤트 리스너 등록
+    //     const startSmsRetriever = async () => {
+    //         try {
+    //             const registered = await SmsRetriever.startSmsRetriever();
+    //             if (registered) {
+    //                 SmsRetriever.addSmsListener((event) => {
+    //                     const { message } = event;
+    //                     ToastAndroid.BOTTOM('SMS 수신:', event)
+    //                     // SMS 메시지에서 인증번호 추출
+    //                     //const regex = /([0-9]{6})/; // 인증번호는 6자리 숫자로 가정
+    //                     // const extractedCode = message.match(regex);
+    //                     // if (extractedCode) {
+    //                     //     setVerificationCode(extractedCode[0]); // 추출한 인증번호 저장
+    //                     // }
+    //                 });
+    //             }
+    //         } catch (error) {
+    //             console.log('SMS 수신 에러:', error);
+    //         }
+    //     };
+
+    //     startSmsRetriever();
+
+    //     return () => {
+    //         // SMS 수신 이벤트 리스너 등록 해제
+    //         SmsRetriever.removeSmsListener();
+    //     };
+    // }, []);
 
     useEffect(() => {
-        const handleBackButtonPress = () => {
-            if (webViewRef && webViewRef.canGoBack) {
-                if (ON_END_URL_LIST.includes(webViewUrl) && backButtonCount < 3) {
-                    if (backButtonCount < 3) {
-
-                    } else {
-                        setBackButtonCount((count) => count + 1);
-                    }
-                    return true; // back 버튼 이벤트를 처리했음을 알림
-                } else {
-                    webViewRef.goBack();
-                    setBackButtonCount(0);
-                    return true;
-                }
-            } else {
-                return false;
-            }
-
-        };
-        BackHandler.addEventListener('hardwareBackPress', handleBackButtonPress); // back 버튼 이벤트 핸들러 등록
+        BackHandler.addEventListener('hardwareBackPress', onAndroidBackPress);
         return () => {
-            BackHandler.removeEventListener('hardwareBackPress', handleBackButtonPress); // back 버튼 이벤트 핸들러 제거
+            BackHandler.removeEventListener('hardwareBackPress', onAndroidBackPress);
         };
-    }, [webViewUrl, backButtonCount]);
+    }, [backButtonCount, canGoBack, currentURL]);
+    const onAndroidBackPress = () => {
+        if (canGoBack) {
+            webViewRef.current.goBack();
+            return true;
+        } else {
+            return false; // app will be closed
+        }
+    };
     const onMessage = async (e) => {
         const event = JSON.parse(e.nativeEvent.data)
-        console.log(event?.method)
         let method = event?.method;
         let data = {};
-        if (event?.method == 'kakao_login') {//
+        let sns_login_method_list = ['kakao_login', 'apple_login'];
+        if (sns_login_method_list.includes(method)) {
             if (webViewRef.current) {
-                try {
-                    const token = await login();
-                    console.log(token)
-                    const profile = await getKakaoProfile();
-                    console.log(profile)
-                    let kakao_data = await getSharedPreference(SHARED_PREFERENCE.KAKAO_DATA);
-
-                    if (typeof kakao_data == 'string') {
-                        kakao_data = JSON.parse(kakao_data);
+                let profile = {};
+                if (method == 'kakao_login') {//
+                    try {
+                        const token = await login();
+                        profile = await getKakaoProfile();
+                        // 로그인 성공 시 처리
+                    } catch (error) {
+                        console.log(error);
                     }
-                    if (kakao_data?.id != profile?.id) {
-                        let result = await deleteSharedPreference(SHARED_PREFERENCE.PHONE);
-                        let result2 = await setSharedPreference(SHARED_PREFERENCE.KAKAO_DATA, JSON.stringify(profile));
+                } else if (method == 'apple_login') {
+                    let user = await onAppleButtonPress();
+                    if (user?.user) {
+                        profile['id'] = user?.user;
                     }
-                    let phone = await getSharedPreference(SHARED_PREFERENCE.PHONE);
-                    webViewRef.current.postMessage(
-                        JSON.stringify({ method: event?.method, data: { ...profile, phone: phone } }),
-                        '*'
-                    )
-                    // 로그인 성공 시 처리
-                } catch (error) {
-                    console.log(error);
-                    // 로그인 실패 시 처리
                 }
-
+                let sns_data = await getSharedPreference(SHARED_PREFERENCE.SNS_DATA);
+                if (typeof sns_data == 'string') {
+                    sns_data = JSON.parse(sns_data);
+                }
+                if (sns_data?.id != profile?.id) {
+                    let result = await deleteSharedPreference(SHARED_PREFERENCE.PHONE);
+                    let result2 = await setSharedPreference(SHARED_PREFERENCE.SNS_DATA, JSON.stringify(profile));
+                }
+                let phone = await getSharedPreference(SHARED_PREFERENCE.PHONE);
+                webViewRef.current.postMessage(
+                    JSON.stringify({ method: method, data: { ...profile, phone: phone } }),
+                    '*'
+                )
             }
-        } else if (event?.method == 'apple_login') {
-            onAppleButtonPress();
-        } else if (event?.method == 'phone_save') {//
+        } else if (method == 'phone_save') {//
             try {
                 let phone = await getSharedPreference(SHARED_PREFERENCE.PHONE);
-
                 if (phone != event.data?.phone && phone) { // 새로운 폰번호가 들어왔을때
-                    let result = await deleteSharedPreference(SHARED_PREFERENCE.KAKAO_DATA);
+                    let result = await deleteSharedPreference(SHARED_PREFERENCE.SNS_DATA);
                 }
                 console.log(event.data)
-
                 setSharedPreference(SHARED_PREFERENCE.PHONE, event.data?.phone ?? "")
                 setSharedPreference(SHARED_PREFERENCE.TOKEN, event.data?.token ?? "")
                 setSharedPreference(SHARED_PREFERENCE.LOGIN_TYPE, event.data?.login_type ?? "0")
@@ -122,27 +138,44 @@ const WebviewComponent = (props) => {
                 console.log(err);
             }
 
-        } else if (event?.method == 'logined') {
+        } else if (method == 'logined') {
             let phone = await getSharedPreference(SHARED_PREFERENCE.PHONE);
             let token = await getSharedPreference(SHARED_PREFERENCE.TOKEN);
             let login_type = await getSharedPreference(SHARED_PREFERENCE.LOGIN_TYPE);
             let os = Platform.OS;
             webViewRef.current.postMessage(
-                JSON.stringify({ method: event?.method, data: { phone: phone, token: token, login_type: login_type, os: os.toString() } }),
+                JSON.stringify({ method: method, data: { phone: phone, token: token, login_type: login_type, os: os.toString() } }),
                 '*'
             )
-        } else if (event?.method == 'logout') {
+        } else if (method == 'logout') {
             let result2 = await deleteSharedPreference(SHARED_PREFERENCE.TOKEN);
             let result3 = await deleteSharedPreference(SHARED_PREFERENCE.LOGIN_TYPE);
+        } else if (method == 'mode') {
+            if (event?.data?.mode) {
+                await setSharedPreference(SHARED_PREFERENCE.MODE, event.data?.mode);
+                setBackgroundColor(event.data?.backgroundColor ?? "");
+                await setSharedPreference(SHARED_PREFERENCE.BACKGROUND_COLOR, event.data?.backgroundColor);
+            }
+            let os = Platform.OS;
+            let mode = await getSharedPreference(SHARED_PREFERENCE.MODE);
+            let background_color = await getSharedPreference(SHARED_PREFERENCE.BACKGROUND_COLOR);
+            setBackgroundColor(background_color)
+            webViewRef.current.postMessage(
+                JSON.stringify({ method: method, data: { mode: mode, os: os } }),
+                '*'
+            )
         }
     }
     const handleWebViewNavigationStateChange = (navState) => {
-        console.log(navState.url)
-        setWebViewUrl(navState.url); // WebView의 URL이 변경될 때마다 현재 URL 업데이트
+        setCurrentURL(navState.url);
+        setCanGoBack(navState.canGoBack);
     };
     const handleWebViewError = (error) => {
         console.error(error); // WebView에서 에러 발생 시 에러 로그 출력
     };
+    useEffect(() => {
+        console.log(webViewRef.current)
+    }, [webViewRef.current])
     return (
         <WebView
             ref={webViewRef}
@@ -152,9 +185,15 @@ const WebviewComponent = (props) => {
             onMessage={onMessage}
             onNavigationStateChange={handleWebViewNavigationStateChange}
             onLoad={() => {
-                setVisible(false)
+                setVisible(false);
             }}
             onError={handleWebViewError}
+            androidHardwareAccelerationEnabled={true}
+            cacheEnabled={true}
+            decelerationRate="normal"
+            sharedCookiesEnabled={true}
+            renderingMode="hybrid"
+            useWebkit={true}
         />
     )
 }

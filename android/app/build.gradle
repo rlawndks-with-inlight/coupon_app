@@ -33,7 +33,7 @@ android {
         applicationId "com.comagain.comagain"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
+        versionCode 4
         versionName "1.0"
     }
 
@@ -95,6 +95,7 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation "com.facebook.react:react-native:+" 
     implementation project(':react-native-config')
+    // implementation project(':react-native-sms-retriever')
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.0.0")
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")

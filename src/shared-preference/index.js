@@ -12,7 +12,9 @@ export const deleteSharedPreference = async (key) => {
 }
 export const SHARED_PREFERENCE = {
     PHONE: 'phone',
-    KAKAO_DATA: 'kakao_data',
+    SNS_DATA: 'sns_data',
     TOKEN: 'token',
-    LOGIN_TYPE: 'login_type'
+    LOGIN_TYPE: 'login_type',
+    MODE: 'mode',
+    BACKGROUND_COLOR: 'background_color',
 }
