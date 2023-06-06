@@ -3,22 +3,26 @@ import { View, Image, StyleSheet, Text } from 'react-native';
 import WebviewComponent from './components/WebviewComponent';
 import SplashScreen from 'react-native-splash-screen';
 import { BackHandler, Platform, StatusBar } from 'react-native';
-import { getStatusBarHeight } from 'react-native-status-bar-height';
+import { getStatusBarHeight } from "react-native-status-bar-height";
+import { isIphoneX, getBottomSpace } from "react-native-iphone-x-helper";
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const StatusBarHeight =
-  Platform.OS === 'ios' ? (getStatusBarHeight(true) + 20) : 0;
+  Platform.OS === 'ios' ? (getStatusBarHeight(true)+10) : 0;
 
+  console.log(StatusBarHeight)
 const App = () => {
   const [visible, setVisible] = useState(true);
   const [backgroundColor, setBackgroundColor] = useState('');
+  const [statusBarStyle, setStatusBarStyle] = useState('dark-content')
   useEffect(() => {
     if (!visible) {
       SplashScreen.hide();
     }
   }, [visible])
   useEffect(() => {
-    console.log(backgroundColor)
+    setStatusBarStyle(isDark(backgroundColor) ? 'light-content' : 'dark-content')
   }, [backgroundColor])
 
   const isDark = (color) => {
@@ -34,7 +38,7 @@ const App = () => {
     let luma = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
     return luma < 40;
   }
-  let statusBarStyle = isDark(backgroundColor) ? 'light-content' : 'dark-content';
+
   return (
     <>
       <SafeAreaView style={{ flex: 1, backgroundColor: backgroundColor ?? "#fff" }}>

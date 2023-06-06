@@ -6,7 +6,7 @@ import { SHARED_PREFERENCE, deleteSharedPreference, getSharedPreference, setShar
 import { WebView } from 'react-native-webview';
 import { appleAuth, AppleButton } from '@invertase/react-native-apple-authentication';
 // import SmsRetriever from 'react-native-sms-retriever';
-
+import GetLocation from 'react-native-get-location';
 
 const WEBVIEW_URL = `https://team.comagain.kr`;
 const ON_END_URL_LIST = [
@@ -159,9 +159,20 @@ const WebviewComponent = (props) => {
             let os = Platform.OS;
             let mode = await getSharedPreference(SHARED_PREFERENCE.MODE);
             let background_color = await getSharedPreference(SHARED_PREFERENCE.BACKGROUND_COLOR);
+            background_color = background_color??"#fff";
             setBackgroundColor(background_color)
+
             webViewRef.current.postMessage(
                 JSON.stringify({ method: method, data: { mode: mode, os: os } }),
+                '*'
+            )
+        } else if (method == 'get_location'){
+            let location = await GetLocation.getCurrentPosition({
+                enableHighAccuracy: true,
+                timeout: 60000,
+            });
+            webViewRef.current.postMessage(
+                JSON.stringify({ method: method, data: location }),
                 '*'
             )
         }
