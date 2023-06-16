@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
-import { View, Image, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet} from 'react-native';
 import WebviewComponent from './components/WebviewComponent';
 import SplashScreen from 'react-native-splash-screen';
-import { BackHandler, Platform, StatusBar } from 'react-native';
-import { getStatusBarHeight } from "react-native-status-bar-height";
-import { isIphoneX, getBottomSpace } from "react-native-iphone-x-helper";
-
+import { Platform, StatusBar } from 'react-native';
+import {getStatusBarHeight} from 'react-native-safearea-height';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const StatusBarHeight =
-  Platform.OS === 'ios' ? (getStatusBarHeight(true)+10) : 0;
+  Platform.OS === 'ios' ? (getStatusBarHeight(true)) : 0;
 
   console.log(StatusBarHeight)
 const App = () => {

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 //import { WebView } from 'react-native-webview';
 import { BackHandler, Platform, ToastAndroid } from 'react-native';
-import { login, logout, getProfile as getKakaoProfile, unlink } from '@react-native-seoul/kakao-login';
+import { login , logout, getProfile as getKakaoProfile, unlink, loginWithKakaoAccount } from '@react-native-seoul/kakao-login';
 import { SHARED_PREFERENCE, deleteSharedPreference, getSharedPreference, setSharedPreference } from '../shared-preference';
 import { WebView } from 'react-native-webview';
 import { appleAuth, AppleButton } from '@invertase/react-native-apple-authentication';
@@ -90,6 +90,7 @@ const WebviewComponent = (props) => {
     const onMessage = async (e) => {
         const event = JSON.parse(e.nativeEvent.data)
         let method = event?.method;
+        console.log(method)
         let data = {};
         let sns_login_method_list = ['kakao_login', 'apple_login'];
         if (sns_login_method_list.includes(method)) {
@@ -173,6 +174,12 @@ const WebviewComponent = (props) => {
             });
             webViewRef.current.postMessage(
                 JSON.stringify({ method: method, data: location }),
+                '*'
+            )
+        } else if(method=='app_initial'){
+            setVisible(false);
+            webViewRef.current.postMessage(
+                JSON.stringify({ method: method, data: {} }),
                 '*'
             )
         }
